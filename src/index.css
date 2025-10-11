@@ -1,0 +1,6 @@
+
+@import url('https://fonts.cdnfonts.com/css/cooper-hewitt'); /* example if using a CDN */
+@import "tailwindcss";
+.font-cooper {
+  font-family: 'Cooper BT', sans-serif;
+}
