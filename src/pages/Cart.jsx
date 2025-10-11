@@ -6,12 +6,13 @@ const Cart = () => {
   const [cartItems, setCartItems] = useState([]);
   const [totalPrice, setTotalPrice] = useState(0);
   const [clientName, setClientName] = useState("");
+  console.log(cartItems, "==item");
 
   useEffect(() => {
     const getCart = async () => {
       try {
         const response = await axiosInstance.get("/cart/get-cart");
-        const items = response.data.cart.items;
+        const items = response.data.cart.items || [];
         setCartItems(items);
 
         const total = items.reduce(
@@ -27,9 +28,48 @@ const Cart = () => {
     getCart();
   }, []);
 
-  // Empty functions
-  const handleIncrease = (id) => {};
-  const handleDecrease = (id) => {};
+  // Increase quantity
+  const handleIncrease = async (productId) => {
+    try {
+      const response = await axiosInstance.put("/cart/update-cart", {
+        productId: productId,
+        action: "increase",
+      });
+      const items = response.data.cart.items || [];
+      setCartItems(items);
+
+      // Recalculate total after update
+      const total = items.reduce(
+        (acc, item) => acc + item.quantity * item.price,
+        0
+      );
+      setTotalPrice(total);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  // Decrease quantity
+  const handleDecrease = async (productId) => {
+    try {
+      const response = await axiosInstance.put("/cart/update-cart", {
+        productId: productId,
+        action: "decrease",
+      });
+      const items = response.data.cart.items || [];
+      setCartItems(items);
+
+      // Recalculate total after update
+      const total = items.reduce(
+        (acc, item) => acc + item.quantity * item.price,
+        0
+      );
+      setTotalPrice(total);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   const handleRemove = (id) => {};
 
   return (
@@ -50,7 +90,9 @@ const Cart = () => {
       </div>
 
       {cartItems.length === 0 ? (
-        <p className="text-center text-gray-500 text-base">Your cart is empty.</p>
+        <p className="text-center text-gray-500 text-base">
+          Your cart is empty.
+        </p>
       ) : (
         <>
           <div className="space-y-4">
@@ -70,21 +112,33 @@ const Cart = () => {
 
                 {/* Info */}
                 <div className="flex-1 ml-4">
-                  <h3 className="text-md font-medium text-gray-900">{item.itemName}</h3>
-                  <p className="text-sm text-gray-600">${item.price.toFixed(2)}</p>
+                  <h3 className="text-md font-medium text-gray-900">
+                    {item.itemName}
+                  </h3>
+                  <p className="text-sm text-gray-600">
+                    ${item.price.toFixed(2)}
+                  </p>
                 </div>
 
                 {/* Quantity Controls */}
                 <div className="flex items-center space-x-2">
                   <button
-                    onClick={() => handleDecrease(item._id)}
+                    onClick={() =>
+                      handleDecrease(
+                        item.productId._id ? item.productId._id : item.productId
+                      )
+                    }
                     className="p-2 rounded-md bg-gray-200 hover:bg-gray-300 transition"
                   >
                     <FaMinus size={12} />
                   </button>
                   <span className="w-6 text-center">{item.quantity}</span>
                   <button
-                    onClick={() => handleIncrease(item._id)}
+                    onClick={() =>
+                      handleIncrease(
+                        item.productId._id ? item.productId._id : item.productId
+                      )
+                    }
                     className="p-2 rounded-md bg-gray-200 hover:bg-gray-300 transition"
                   >
                     <FaPlus size={12} />
