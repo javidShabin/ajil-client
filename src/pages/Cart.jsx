@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { FaPlus, FaMinus, FaTrash } from "react-icons/fa";
 import { axiosInstance } from "../config/axiosInstance";
+import toast from "react-hot-toast";
 
 const Cart = () => {
   const [cartItems, setCartItems] = useState([]);
   const [totalPrice, setTotalPrice] = useState(0);
   const [clientName, setClientName] = useState("");
-  console.log(cartItems, "==item");
 
   useEffect(() => {
     const getCart = async () => {
@@ -70,7 +70,27 @@ const Cart = () => {
     }
   };
 
-  const handleRemove = (id) => {};
+  const handleRemove = async (productId) => {
+    try {
+      const response = await axiosInstance.delete("/cart/remove-item", {
+        data: { productId },
+      });
+      toast.success(response.data.message);
+
+      // Update UI with new cart
+      const items = response.data.cart.items || [];
+      setCartItems(items);
+
+      // Recalculate total
+      const total = items.reduce(
+        (acc, item) => acc + item.quantity * item.price,
+        0
+      );
+      setTotalPrice(total);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   return (
     <section className="max-w-6xl mx-auto px-4 py-12">
@@ -147,7 +167,11 @@ const Cart = () => {
 
                 {/* Remove */}
                 <button
-                  onClick={() => handleRemove(item._id)}
+                  onClick={() =>
+                    handleRemove(
+                      item.productId._id ? item.productId._id : item.productId
+                    )
+                  }
                   className="ml-4 p-2 rounded-md bg-red-500 hover:bg-red-600 text-white transition"
                 >
                   <FaTrash size={12} />
