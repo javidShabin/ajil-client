@@ -1,7 +1,8 @@
-
-import ProductSection from "./Products";
 import Hero from "../components/Hero";
+import ProductTypes from "../components/ProductType";
 
+import About from "./About";
+import ProductSection from "./Products";
 
 export const Home = () => {
   const user = { name: "Ramshiya" };
@@ -11,8 +12,9 @@ export const Home = () => {
   ];
   return (
     <>
-    <Hero />
-    <ProductSection />
+      <Hero />
+      <About />
+      <ProductTypes />
     </>
   );
 };

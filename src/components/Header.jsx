@@ -5,7 +5,7 @@ import { DataContext } from "../hook/AuthHook";
 
 const Header = () => {
   const [open, setOpen] = useState(false);
-    const { isAuthenticated } = useContext(DataContext);
+  const { isAuthenticated } = useContext(DataContext);
 
   return (
     <header className="fixed top-5 left-1/2 -translate-x-1/2 w-[95%] sm:w-[92%] md:w-[88%] max-w-6xl 
@@ -27,7 +27,7 @@ const Header = () => {
       </Link>
 
       {/* Desktop Nav */}
-      <nav className="hidden md:flex items-center space-x-8 text-white font-semibold text-base lg:text-lg">
+      <nav className="hidden md:flex items-center space-x-8 text-gray-900 font-semibold text-base lg:text-lg">
         <Link
           to="/"
           className="hover:text-orange-400 transition-all duration-200 relative after:absolute after:content-[''] after:left-0 after:bottom-0 after:w-0 after:h-[2px] after:bg-orange-400 hover:after:w-full after:transition-all"
@@ -52,7 +52,6 @@ const Header = () => {
         >
           Contact
         </Link>
-        
       </nav>
 
       {/* Right Buttons */}
@@ -68,7 +67,7 @@ const Header = () => {
         {/* Cart Icon */}
         <Link
           to="/cart"
-          className="relative text-white hover:text-orange-400 transition-transform hover:scale-110"
+          className="relative text-black hover:text-orange-400 transition-transform hover:scale-110"
         >
           <ShoppingCart size={28} />
         </Link>
@@ -129,7 +128,7 @@ const Header = () => {
             <Link
               to="/cart"
               onClick={() => setOpen(false)}
-              className="text-orange-500 hover:scale-110 transition-transform"
+              className="text-black hover:scale-110 transition-transform"
             >
               <ShoppingCart size={26} />
             </Link>
