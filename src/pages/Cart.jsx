@@ -2,6 +2,9 @@ import React, { useEffect, useState } from "react";
 import { FaPlus, FaMinus, FaTrash } from "react-icons/fa";
 import { axiosInstance } from "../config/axiosInstance";
 import toast from "react-hot-toast";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
+import Swal from "sweetalert2";
 
 const Cart = () => {
   const [cartItems, setCartItems] = useState([]);
@@ -14,57 +17,38 @@ const Cart = () => {
         const response = await axiosInstance.get("/cart/get-cart");
         const items = response.data.cart.items || [];
         setCartItems(items);
-
-        const total = items.reduce(
-          (acc, item) => acc + item.quantity * item.price,
-          0
-        );
+        const total = items.reduce((acc, item) => acc + item.quantity * item.price, 0);
         setTotalPrice(total);
       } catch (error) {
         console.log(error);
       }
     };
-
     getCart();
   }, []);
 
-  // Increase quantity
   const handleIncrease = async (productId) => {
     try {
       const response = await axiosInstance.put("/cart/update-cart", {
-        productId: productId,
+        productId,
         action: "increase",
       });
       const items = response.data.cart.items || [];
       setCartItems(items);
-
-      // Recalculate total after update
-      const total = items.reduce(
-        (acc, item) => acc + item.quantity * item.price,
-        0
-      );
-      setTotalPrice(total);
+      setTotalPrice(items.reduce((acc, i) => acc + i.quantity * i.price, 0));
     } catch (error) {
       console.log(error);
     }
   };
 
-  // Decrease quantity
   const handleDecrease = async (productId) => {
     try {
       const response = await axiosInstance.put("/cart/update-cart", {
-        productId: productId,
+        productId,
         action: "decrease",
       });
       const items = response.data.cart.items || [];
       setCartItems(items);
-
-      // Recalculate total after update
-      const total = items.reduce(
-        (acc, item) => acc + item.quantity * item.price,
-        0
-      );
-      setTotalPrice(total);
+      setTotalPrice(items.reduce((acc, i) => acc + i.quantity * i.price, 0));
     } catch (error) {
       console.log(error);
     }
@@ -76,21 +60,83 @@ const Cart = () => {
         data: { productId },
       });
       toast.success(response.data.message);
-
-      // Update UI with new cart
       const items = response.data.cart.items || [];
       setCartItems(items);
-
-      // Recalculate total
-      const total = items.reduce(
-        (acc, item) => acc + item.quantity * item.price,
-        0
-      );
-      setTotalPrice(total);
+      setTotalPrice(items.reduce((acc, i) => acc + i.quantity * i.price, 0));
     } catch (error) {
       console.log(error);
     }
   };
+  
+
+const handleCheckout = () => {
+  if (!clientName) {
+    Swal.fire({
+      icon: 'warning',
+      title: 'Missing Name',
+      text: 'Please enter your name before generating the invoice.',
+      confirmButtonColor: '#f97316', // orange
+    });
+    return;
+  }
+
+  const doc = new jsPDF("p", "mm", "a4");
+  const pageWidth = doc.internal.pageSize.getWidth();
+
+  // Header
+  doc.setFillColor(249, 115, 22);
+  doc.rect(0, 0, pageWidth, 40, "F");
+  doc.setTextColor(255, 255, 255);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(22);
+  doc.text("LuxuryStore Invoice", pageWidth / 2, 20, { align: "center" });
+  doc.setFontSize(12);
+  doc.text("Your trusted premium store", pageWidth / 2, 30, { align: "center" });
+
+  // Client info
+  doc.setFillColor(245, 245, 245);
+  doc.roundedRect(14, 50, pageWidth - 28, 25, 3, 3, "F");
+  doc.setTextColor(60, 60, 60);
+  doc.setFontSize(12);
+  doc.text(`Client Name: ${clientName}`, 20, 60);
+  doc.text(`Date: ${new Date().toLocaleDateString()}`, 20, 68);
+
+  // Prepare table
+  const tableColumns = ["#", "Item", "Price", "Qty", "Total"];
+  const tableRows = cartItems.map((item, index) => [
+    index + 1,
+    item.itemName,
+    `$${item.price.toFixed(2)}`,
+    item.quantity,
+    `$${(item.price * item.quantity).toFixed(2)}`
+  ]);
+
+  doc.autoTable({
+    startY: 85,
+    head: [tableColumns],
+    body: tableRows,
+    theme: "grid",
+    headStyles: {
+      fillColor: [249, 115, 22],
+      textColor: [255, 255, 255],
+      halign: "center",
+      fontStyle: "bold",
+    },
+    bodyStyles: {
+      textColor: [60, 60, 60],
+      fontSize: 10,
+    },
+    alternateRowStyles: { fillColor: [250, 250, 250] },
+  });
+
+  const finalY = doc.lastAutoTable.finalY + 10;
+  doc.setFontSize(14);
+  doc.setFont("helvetica", "bold");
+  doc.setTextColor(249, 115, 22);
+  doc.text(`Grand Total: $${totalPrice.toFixed(2)}`, 14, finalY);
+
+  doc.save("LuxuryStore_Invoice.pdf");
+};
 
   return (
     <section className="max-w-6xl mx-auto px-4 py-12">
@@ -110,9 +156,7 @@ const Cart = () => {
       </div>
 
       {cartItems.length === 0 ? (
-        <p className="text-center text-gray-500 text-base">
-          Your cart is empty.
-        </p>
+        <p className="text-center text-gray-500 text-base">Your cart is empty.</p>
       ) : (
         <>
           <div className="space-y-4">
@@ -121,57 +165,33 @@ const Cart = () => {
                 key={item._id || item.productId}
                 className="flex items-center justify-between p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow"
               >
-                {/* Image */}
                 <div className="w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden">
-                  <img
-                    src={item.image}
-                    alt={item.itemName}
-                    className="w-full h-full object-cover"
-                  />
+                  <img src={item.image} alt={item.itemName} className="w-full h-full object-cover" />
                 </div>
 
-                {/* Info */}
                 <div className="flex-1 ml-4">
-                  <h3 className="text-md font-medium text-gray-900">
-                    {item.itemName}
-                  </h3>
-                  <p className="text-sm text-gray-600">
-                    ${item.price.toFixed(2)}
-                  </p>
+                  <h3 className="text-md font-medium text-gray-900">{item.itemName}</h3>
+                  <p className="text-sm text-gray-600">${item.price.toFixed(2)}</p>
                 </div>
 
-                {/* Quantity Controls */}
                 <div className="flex items-center space-x-2">
                   <button
-                    onClick={() =>
-                      handleDecrease(
-                        item.productId._id ? item.productId._id : item.productId
-                      )
-                    }
+                    onClick={() => handleDecrease(item.productId._id ? item.productId._id : item.productId)}
                     className="p-2 rounded-md bg-gray-200 hover:bg-gray-300 transition"
                   >
                     <FaMinus size={12} />
                   </button>
                   <span className="w-6 text-center">{item.quantity}</span>
                   <button
-                    onClick={() =>
-                      handleIncrease(
-                        item.productId._id ? item.productId._id : item.productId
-                      )
-                    }
+                    onClick={() => handleIncrease(item.productId._id ? item.productId._id : item.productId)}
                     className="p-2 rounded-md bg-gray-200 hover:bg-gray-300 transition"
                   >
                     <FaPlus size={12} />
                   </button>
                 </div>
 
-                {/* Remove */}
                 <button
-                  onClick={() =>
-                    handleRemove(
-                      item.productId._id ? item.productId._id : item.productId
-                    )
-                  }
+                  onClick={() => handleRemove(item.productId._id ? item.productId._id : item.productId)}
                   className="ml-4 p-2 rounded-md bg-red-500 hover:bg-red-600 text-white transition"
                 >
                   <FaTrash size={12} />
@@ -180,12 +200,14 @@ const Cart = () => {
             ))}
           </div>
 
-          {/* Checkout */}
           <div className="mt-8 flex flex-col sm:flex-row justify-between items-center bg-gray-100 p-6 rounded-lg">
             <span className="text-lg font-semibold text-gray-900">
               Total: ${totalPrice.toFixed(2)}
             </span>
-            <button className="mt-4 sm:mt-0 px-6 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition">
+            <button
+              onClick={handleCheckout}
+              className="mt-4 sm:mt-0 px-6 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition"
+            >
               Proceed to Checkout
             </button>
           </div>
