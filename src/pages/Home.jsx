@@ -1,3 +1,4 @@
+import Footer from "../components/Footer";
 import Hero from "../components/Hero";
 import ProductTypes from "../components/ProductType";
 
@@ -15,6 +16,7 @@ export const Home = () => {
       <Hero />
       <About />
       <ProductTypes />
+      <Footer />
     </>
   );
 };

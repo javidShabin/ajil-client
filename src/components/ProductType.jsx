@@ -60,6 +60,11 @@ const ProductTypes = () => {
         </div>
 
       </div>
+
+      {/* Longer Paragraph at the bottom */}
+      <p className="text-center text-gray-700 text-sm sm:text-base mt-12 max-w-3xl mx-auto leading-relaxed">
+        Explore our carefully curated product types designed to meet every need and preference. Whether you are looking for luxurious premium items that elevate your lifestyle or dependable normal products that offer exceptional value, our collection provides the perfect solution. Each product is crafted with attention to detail, quality materials, and a focus on your satisfaction, ensuring that every purchase is an investment in both style and functionality.
+      </p>
     </div>
   )
 }
