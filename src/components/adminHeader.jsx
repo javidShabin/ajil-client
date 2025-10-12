@@ -49,7 +49,7 @@ const AdminHeader = () => {
       {/* Right-side Profile Button */}
       <div className="hidden md:flex items-center gap-5">
         <Link
-          to="/profile"
+          to="/admin/profile"
           className="px-4 py-2 bg-gradient-to-r from-orange-400 to-amber-500 text-white font-bold rounded-full shadow-lg hover:shadow-orange-500/30 hover:scale-105 transition-all duration-300 flex items-center gap-2"
         >
           <User size={18} /> Profile

@@ -13,6 +13,7 @@ import AddProduct from "../pages/AddProduct";
 import PremiumProduct from "../components/PermiumProduct";
 import NormalProduct from "../components/NormalProduct";
 import Contact from "../pages/Contact";
+import Profile from "../pages/Profile";
 
 
 export const router = createBrowserRouter([
@@ -65,6 +66,10 @@ export const router = createBrowserRouter([
           {
             path:"add-product",
             element: <AddProduct />
+          },
+          {
+            path: "profile",
+            element: <Profile />
           }
         ],
       },
