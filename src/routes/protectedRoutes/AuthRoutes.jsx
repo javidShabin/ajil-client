@@ -1,6 +1,6 @@
 import React, { useContext, useEffect } from "react";
 import { useNavigate, Outlet } from "react-router-dom";
-import { DataContext } from "../hooks/AuthHook"; // adjust the path if needed
+import { DataContext } from "../../hook/AuthHook"; // adjust the path if needed
 
 const AuthRoutes = () => {
   const navigate = useNavigate();

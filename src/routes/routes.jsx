@@ -7,6 +7,8 @@ import About from "../pages/About";
 import ProductSection from "../pages/Products";
 import Cart from "../pages/Cart";
 import Login from "../pages/Login";
+import AuthRoutes from "./protectedRoutes/AuthRoutes";
+import ProdutList from "../pages/ProdutList";
 
 
 export const router = createBrowserRouter([
@@ -34,6 +36,18 @@ export const router = createBrowserRouter([
             {
                 path: "login",
                 element: <Login />
+            },
+
+            {
+                path: "admin",
+                element: <AuthRoutes />,
+
+                children: [
+                    {
+                        path:"admin",
+                        element: <ProdutList />
+                    }
+                ]
             }
         ]
     },
