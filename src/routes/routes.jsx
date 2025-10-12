@@ -9,6 +9,7 @@ import Cart from "../pages/Cart";
 import Login from "../pages/Login";
 import AuthRoutes from "./protectedRoutes/AuthRoutes";
 import ProdutList from "../pages/ProdutList";
+import AddProduct from "../pages/AddProduct";
 
 
 export const router = createBrowserRouter([
@@ -46,6 +47,10 @@ export const router = createBrowserRouter([
             path: "", // renders at /admin
             element: <ProdutList />,
           },
+          {
+            path:"add-product",
+            element: <AddProduct />
+          }
         ],
       },
         ]

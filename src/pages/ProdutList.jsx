@@ -2,10 +2,12 @@ import React, { useEffect, useState } from "react";
 import { axiosInstance } from "../config/axiosInstance";
 import { FaTrash, FaEdit, FaPlus } from "react-icons/fa";
 import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 
 const ProductList = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate()
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -39,7 +41,7 @@ const ProductList = () => {
   };
 
   const handleAddMenu = () => {
-    console.log("Add new product");
+    navigate("/admin/add-product")
   };
 
   return (
