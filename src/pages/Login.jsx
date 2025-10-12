@@ -3,6 +3,8 @@ import { useForm } from "react-hook-form";
 import { motion } from "framer-motion";
 import { Mail, Lock } from "lucide-react";
 import { Link } from "react-router-dom";
+import { axiosInstance } from "../config/axiosInstance";
+import toast from "react-hot-toast";
 
 const Login = () => {
   const {
@@ -11,8 +13,15 @@ const Login = () => {
     formState: { errors },
   } = useForm();
 
-  const onSubmit = (data) => {
-    console.log("Login Data:", data);
+  const onSubmit = async (data) => {
+    try {
+        const resposne = await axiosInstance.post("/user/user-login",data )
+        toast.success(resposne.data.message)
+        
+    } catch (error) {
+        console.log(error)
+        toast.error("Login failed")
+    }
   };
 
   return (
