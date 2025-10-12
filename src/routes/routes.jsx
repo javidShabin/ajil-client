@@ -10,6 +10,8 @@ import Login from "../pages/Login";
 import AuthRoutes from "./protectedRoutes/AuthRoutes";
 import ProdutList from "../pages/ProdutList";
 import AddProduct from "../pages/AddProduct";
+import PremiumProduct from "../components/PermiumProduct";
+import NormalProduct from "../components/NormalProduct";
 
 
 export const router = createBrowserRouter([
@@ -37,6 +39,14 @@ export const router = createBrowserRouter([
             {
                 path: "login",
                 element: <Login />
+            },
+            {
+                path:"premium-product",
+                element: <PremiumProduct />
+            },
+            {
+                path: "normal-product",
+                element: <NormalProduct />
             },
 
             {
