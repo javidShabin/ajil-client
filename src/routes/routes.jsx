@@ -12,6 +12,7 @@ import ProdutList from "../pages/ProdutList";
 import AddProduct from "../pages/AddProduct";
 import PremiumProduct from "../components/PermiumProduct";
 import NormalProduct from "../components/NormalProduct";
+import Contact from "../pages/Contact";
 
 
 export const router = createBrowserRouter([
@@ -47,6 +48,10 @@ export const router = createBrowserRouter([
             {
                 path: "normal-product",
                 element: <NormalProduct />
+            },
+            {
+                path: "contact",
+                element: <Contact />
             },
 
             {
