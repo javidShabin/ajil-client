@@ -1,12 +1,18 @@
-import React from "react";
+import React, { useContext } from "react";
 import { useForm } from "react-hook-form";
 import { motion } from "framer-motion";
 import { Mail, Lock } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { axiosInstance } from "../config/axiosInstance";
 import toast from "react-hot-toast";
+import { DataContext } from "../hook/AuthHook";
 
 const Login = () => {
+
+  const {login} = useContext(DataContext)
+
+  const navigate = useNavigate()
+
   const {
     register,
     handleSubmit,
@@ -17,7 +23,8 @@ const Login = () => {
     try {
         const resposne = await axiosInstance.post("/user/user-login",data )
         toast.success(resposne.data.message)
-        
+        login(resposne.data.user)
+        navigate("/")
     } catch (error) {
         console.log(error)
         toast.error("Login failed")

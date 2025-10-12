@@ -1,11 +1,19 @@
-import React from 'react'
+import React, { useContext, useEffect } from "react";
+import { useNavigate, Outlet } from "react-router-dom";
+import { DataContext } from "../hooks/AuthHook"; // adjust the path if needed
 
 const AuthRoutes = () => {
-  return (
-    <div>
-      
-    </div>
-  )
-}
+  const navigate = useNavigate();
+  const { isAuthenticated } = useContext(DataContext);
 
-export default AuthRoutes
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigate("/login");
+    }
+  }, [isAuthenticated, navigate]);
+
+  // If authenticated, show protected content
+  return isAuthenticated ? <Outlet /> : null;
+};
+
+export default AuthRoutes;
