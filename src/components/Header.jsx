@@ -44,7 +44,7 @@ const Header = () => {
           to="/products"
           className="hover:text-orange-400 transition-all duration-200 relative after:absolute after:content-[''] after:left-0 after:bottom-0 after:w-0 after:h-[2px] after:bg-orange-400 hover:after:w-full after:transition-all"
         >
-          Products
+          All products
         </Link>
         <Link
           to="/contact"
