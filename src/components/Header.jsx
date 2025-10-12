@@ -1,9 +1,11 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { Menu, X, ShoppingCart, UserCog } from "lucide-react";
 import { Link } from "react-router-dom";
+import { DataContext } from "../hook/AuthHook";
 
 const Header = () => {
   const [open, setOpen] = useState(false);
+    const { isAuthenticated } = useContext(DataContext);
 
   return (
     <header className="fixed top-5 left-1/2 -translate-x-1/2 w-[95%] sm:w-[92%] md:w-[88%] max-w-6xl 
@@ -50,6 +52,7 @@ const Header = () => {
         >
           Contact
         </Link>
+        
       </nav>
 
       {/* Right Buttons */}

@@ -39,16 +39,15 @@ export const router = createBrowserRouter([
             },
 
             {
-                path: "admin",
-                element: <AuthRoutes />,
-
-                children: [
-                    {
-                        path:"admin",
-                        element: <ProdutList />
-                    }
-                ]
-            }
+        path: "admin",
+        element: <AuthRoutes />,
+        children: [
+          {
+            path: "", // renders at /admin
+            element: <ProdutList />,
+          },
+        ],
+      },
         ]
     },
 ]);

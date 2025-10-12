@@ -1,9 +1,16 @@
-import React, { createContext, useState } from "react";
+import React, { createContext, useEffect, useState } from "react";
 
 export const DataContext = createContext();
 
 const AuthHook = ({ children }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  // Set initial state based on localStorage
+  const [isAuthenticated, setIsAuthenticated] = useState(() => !!localStorage.getItem("userEmail"));
+  const [loading, setLoading] = useState(true); // loading state to prevent flash redirect
+
+  useEffect(() => {
+    setIsAuthenticated(!!localStorage.getItem("userEmail"));
+    setLoading(false); // finished checking auth status
+  }, []);
 
   const login = (email) => {
     localStorage.setItem("userEmail", email);
@@ -21,6 +28,7 @@ const AuthHook = ({ children }) => {
         isAuthenticated,
         login,
         logout,
+        loading, // pass loading to prevent redirect until ready
       }}
     >
       {children}

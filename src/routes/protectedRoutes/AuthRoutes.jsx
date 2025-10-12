@@ -1,19 +1,13 @@
-import React, { useContext, useEffect } from "react";
-import { useNavigate, Outlet } from "react-router-dom";
-import { DataContext } from "../../hook/AuthHook"; // adjust the path if needed
+import React, { useContext } from "react";
+import { Navigate, Outlet } from "react-router-dom";
+import { DataContext } from "../../hook/AuthHook";
 
 const AuthRoutes = () => {
-  const navigate = useNavigate();
-  const { isAuthenticated } = useContext(DataContext);
+  const { isAuthenticated, loading } = useContext(DataContext);
 
-  useEffect(() => {
-    if (!isAuthenticated) {
-      navigate("/login");
-    }
-  }, [isAuthenticated, navigate]);
+  if (loading) return null; // or spinner
 
-  // If authenticated, show protected content
-  return isAuthenticated ? <Outlet /> : null;
+  return isAuthenticated ? <Outlet /> : <Navigate to="/login" replace />;
 };
 
 export default AuthRoutes;
