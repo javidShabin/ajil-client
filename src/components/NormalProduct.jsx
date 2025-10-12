@@ -38,7 +38,7 @@ const NormalProduct = () => {
       setSelectedCategory(category);
       setLoading(true);
       const res = await axiosInstance.get(
-        `/product/filter-product?category=${encodeURIComponent(category)}`
+        `/product/filter-normal?category=${encodeURIComponent(category)}`
       );
       setProducts(res.data);
       setLoading(false);
