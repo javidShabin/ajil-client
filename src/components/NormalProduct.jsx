@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { FaShoppingBag } from "react-icons/fa";
+import { X } from "lucide-react"; // for close button
 import toast from "react-hot-toast";
 import { axiosInstance } from "../config/axiosInstance";
 
@@ -9,9 +10,9 @@ const NormalProduct = () => {
   const [loading, setLoading] = useState(true);
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("");
+  const [selectedImage, setSelectedImage] = useState(null); // <-- fullscreen image
 
   useEffect(() => {
-    // Fetch all products initially
     fetchProducts();
   }, []);
 
@@ -20,11 +21,8 @@ const NormalProduct = () => {
       setLoading(true);
       const res = await axiosInstance.get("/product/get-normal");
       setProducts(res.data);
-
-      // Extract unique categories
       const uniqueCategories = [...new Set(res.data.map((p) => p.category))];
       setCategories(uniqueCategories);
-
       setLoading(false);
     } catch (error) {
       console.error(error);
@@ -50,25 +48,19 @@ const NormalProduct = () => {
   };
 
   const addToCart = async (productId, image, itemName, price) => {
-    const item = {
-      productId,
-      image,
-      itemName,
-      price,
-      quantity: 1, // default quantity
-    };
+    const item = { productId, image, itemName, price, quantity: 1 };
 
     try {
       const resposne = await axiosInstance.post("/cart/add-to-cart", {
-        items: [item], 
+        items: [item],
       });
-      
+
       if (resposne.data) {
-        toast.success("Item added to cart")
+        toast.success("Item added to cart");
       }
     } catch (error) {
       console.log(error);
-      toast.error(error.response.data.message)
+      toast.error(error.response.data.message);
     }
   };
 
@@ -132,6 +124,7 @@ const NormalProduct = () => {
                 src={product.image}
                 alt={product.title}
                 className="w-full h-40 sm:h-44 md:h-46 lg:h-48 object-cover transition-transform duration-500 group-hover:scale-105 group-hover:rotate-1"
+                onClick={() => setSelectedImage(product.image)} // <-- open fullscreen
               />
             </div>
 
@@ -185,6 +178,26 @@ const NormalProduct = () => {
           </motion.div>
         ))}
       </div>
+
+      {/* Fullscreen Image Modal */}
+      {selectedImage && (
+        <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50">
+          <button
+            onClick={() => setSelectedImage(null)}
+            className="absolute top-5 right-5 text-white bg-black/50 rounded-full p-2 hover:bg-black transition"
+          >
+            <X size={24} />
+          </button>
+          <motion.img
+            src={selectedImage}
+            alt="Fullscreen"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0 }}
+            className="max-h-[90vh] max-w-[90vw] object-contain rounded-lg shadow-lg"
+          />
+        </div>
+      )}
     </section>
   );
 };
