@@ -122,7 +122,7 @@ const ProductList = () => {
                 <p className="text-xs text-gray-500 truncate">
                   SKU: <span className="text-gray-700 font-medium">{product.sku}</span>
                 </p>
-                <p className="text-orange-600 font-semibold text-sm mt-1">${product.price}</p>
+                <p className="text-orange-600 font-semibold text-sm mt-1">&#8377;{product.price}</p>
               </div>
 
               <div className="flex justify-between mt-4">

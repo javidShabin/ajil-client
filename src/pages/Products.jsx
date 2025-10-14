@@ -150,7 +150,7 @@ const ProductSection = () => {
                 </p>
                 <div className="flex items-center justify-between mt-2">
                   <span className="text-gray-900 font-semibold text-sm sm:text-base">
-                    ${product.price}
+                    &#8377;{product.price}
                   </span>
                   <span
                     className={`px-2 py-0.5 text-xs rounded-full font-semibold ${
