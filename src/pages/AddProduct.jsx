@@ -150,8 +150,9 @@ const AddProduct = () => {
               className="w-full bg-white/80 border border-gray-300 rounded-xl px-4 py-2 focus:ring-2 focus:ring-orange-400 focus:outline-none"
             >
               <option value="">Select type</option>
-              <option value="cookware">Cookwares</option> {/* ✅ fixed typo */}
-              <option value="dining">Dining</option>
+              <option value="kitchen essentials & cookware">Kitchen Essentials & Cookware</option> {/* ✅ fixed typo */}
+              <option value="dining & serveware">Dining & Serveware</option>
+              <option value="appliances & other needs">Appliances & Other Needse</option>
             </select>
             {errors.types && (
               <p className="text-red-500 text-xs mt-1">{errors.types.message}</p>
