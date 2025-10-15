@@ -15,12 +15,14 @@ const ProductList = () => {
 
   const { register, handleSubmit, reset } = useForm();
 
+
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         setLoading(true);
         const res = await axiosInstance.get("/product/get-all-products");
         setProducts(res.data);
+  
         setLoading(false);
       } catch (error) {
         console.error(error);
