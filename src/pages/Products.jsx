@@ -53,6 +53,7 @@ const ProductSection = () => {
             );
 
       setProducts(res.data);
+      console.log(res, "====types")
       setCategories([...new Set(res.data.map((p) => p.category))]);
       setLoading(false);
     } catch (error) {
