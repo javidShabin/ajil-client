@@ -8,6 +8,7 @@ import toast from "react-hot-toast";
 export const Profile = () => {
     const [profile, setProfile] = useState(null);
     const [showReset, setShowReset] = useState(false);
+    const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
 
     useEffect(() => {
         const getProfileDetails = async () => {
@@ -24,7 +25,7 @@ export const Profile = () => {
 
     const updatePassword = async (email) => {
         try {
-
+            setIsUpdatingPassword(true)
             const response = await axiosInstance.post("/profile/update-password-otp", { email })
             console.log(response)
             toast.success(response.data.message)
@@ -33,6 +34,8 @@ export const Profile = () => {
             }
         } catch (error) {
             console.log(error)
+        } finally {
+            setIsUpdatingPassword(false)
         }
     }
 
@@ -129,8 +132,9 @@ export const Profile = () => {
                                 </motion.button>
                                 <button
                                     onClick={() => { updatePassword(profile.email) }}
-                                    className="w-full px-4 py-2.5 rounded-lg bg-white border border-neutral-200 text-neutral-700 font-medium hover:bg-neutral-50 transition">
-                                    Update password
+                                    disabled={isUpdatingPassword}
+                                    className="w-full px-4 py-2.5 rounded-lg cursor-pointer bg-white border border-neutral-200 text-neutral-700 font-medium hover:bg-neutral-50 transition disabled:opacity-60">
+                                    {isUpdatingPassword ? "Sending OTP..." : "Update password"}
                                 </button>
                             </div>
                         </div>
