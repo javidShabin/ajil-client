@@ -75,7 +75,7 @@ const AdminHeader = () => {
             Products
           </Link>
           <Link
-            to="/add-product"
+            to="/admin/add-product"
             className={`hover:text-orange-400 transition-all duration-200 ${
               location.pathname === "/add-product" ? "text-orange-400" : ""
             }`}

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { FaShoppingBag, FaBars, FaThLarge } from "react-icons/fa";
-import { X, Image as LucideImage, Layers } from "lucide-react";
+import { X, Layers } from "lucide-react";
 import toast from "react-hot-toast";
 import { axiosInstance } from "../config/axiosInstance";
 
@@ -15,10 +15,11 @@ const ProductSection = () => {
   const [loading, setLoading] = useState(true);
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("");
-  const [selectedImage, setSelectedImage] = useState(null);
   const [types, setTypes] = useState([]);
   const [selectedType, setSelectedType] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
 
   useEffect(() => {
     fetchProducts();
@@ -53,7 +54,6 @@ const ProductSection = () => {
             );
 
       setProducts(res.data);
-      console.log(res, "====types");
       setCategories([...new Set(res.data.map((p) => p.category))]);
       setLoading(false);
     } catch (error) {
@@ -103,6 +103,16 @@ const ProductSection = () => {
     }
   };
 
+  const openImageModal = (image, title) => {
+    setSelectedImage({ image, title });
+    setIsImageModalOpen(true);
+  };
+
+  const closeImageModal = () => {
+    setIsImageModalOpen(false);
+    setSelectedImage(null);
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -114,202 +124,221 @@ const ProductSection = () => {
   }
 
   return (
-    <section className="max-w-[95%] mx-auto py-12 mt-3 flex flex-col md:flex-row gap-8">
-      {/* Sidebar Toggle (Mobile) */}
-      <div className="md:hidden mb-4 flex justify-between items-center">
-        <button
-          onClick={() => setSidebarOpen(!sidebarOpen)}
-          className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-lg shadow-lg hover:from-orange-600 hover:to-orange-700 transition w-full justify-center sm:w-auto sm:justify-start"
-        >
-          {sidebarOpen ? <X size={20} /> : <FaBars size={20} />}
-          Categories
-        </button>
-      </div>
-
-      {/* Sidebar */}
-      {sidebarOpen && (
-        <aside className="w-full md:w-66 bg-white flex-shrink-0 flex flex-col gap-4 mb-4 md:mb-0 sticky top-28 self-start p-6 rounded-2xl shadow-xl z-[999] md:z-auto max-h-[80vh] overflow-y-auto">
-          <h3 className="font-bold text-xl mb-4 text-orange-600 border-b pb-3 text-center md:text-left">
-            Product Categories
-          </h3>
-          <button
-            onClick={() => fetchProductsByCategory("")}
-            className={`w-full text-left px-4 py-2 flex items-center justify-center md:justify-start rounded-lg font-medium transition group ${
-              selectedCategory === ""
-                ? "bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-lg border-l-4 border-orange-700"
-                : "bg-gray-50 text-gray-800 hover:bg-gray-100"
-            }`}
+    <>
+      {/* Full Screen Image Modal */}
+      <AnimatePresence>
+        {isImageModalOpen && selectedImage && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-[#000000b8] bg-opacity-90 backdrop-blur-md z-[9999] flex items-center justify-center"
+            onClick={closeImageModal}
           >
-            {sidebarIcon.All}
-            All
-          </button>
-          {categories.map((cat) => (
-            <button
-              key={cat}
-              onClick={() => fetchProductsByCategory(cat)}
-              className={`w-full text-left px-4 py-2 flex items-center justify-center md:justify-start rounded-lg font-medium transition group ${
-                selectedCategory === cat
-                  ? "bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-lg border-l-4 border-orange-700"
-                  : "bg-gray-50 text-gray-800 hover:bg-gray-100"
-              }`}
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.8, opacity: 0 }}
+              className="relative max-w-3xl w-full"
+              onClick={(e) => e.stopPropagation()}
             >
-              {sidebarIcon.Default}
-              {cat}
-            </button>
-          ))}
-        </aside>
-      )}
+              <button
+                onClick={closeImageModal}
+                className="absolute top-4 right-4 z-10 bg-black bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-70 transition"
+              >
+                <X size={24} />
+              </button>
+              <img
+                src={selectedImage.image}
+                alt=""
+                className="w-full object-contain rounded-lg"
+              />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-      {/* Main Content */}
-      <div className="flex-1">
-        {/* Types Filter */}
-        <div className="flex justify-center flex-wrap gap-3 mb-10 mt-8">
+      <section className="max-w-[95%] mx-auto py-12 mt-3 flex flex-col md:flex-row gap-8">
+        {/* Sidebar Toggle (Mobile) */}
+        <div className="md:hidden flex justify-between items-center mt-7">
           <button
-            onClick={() => fetchProductsByType("")}
-            className={`px-4 sm:px-5 py-2.5 rounded-full font-bold transition shadow flex items-center gap-2 text-sm sm:text-base ${
-              selectedType === ""
-                ? "bg-gradient-to-r from-orange-500 to-orange-600 text-white"
-                : "bg-gray-100 text-gray-800 hover:bg-gray-200"
-            }`}
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-lg shadow-lg hover:from-orange-600 hover:to-orange-700 transition w-[200px] md:w-full justify-center sm:w-auto sm:justify-start"
           >
-            <Layers size={17} />
-            All Types
+            {sidebarOpen ? <X size={20} /> : <FaBars size={20} />}
+            Categories
           </button>
-          {types.map((type) => (
+        </div>
+
+        {/* Sidebar */}
+        <AnimatePresence>
+          {sidebarOpen && (
+            <motion.aside
+              initial={{ x: -300, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: -300, opacity: 0 }}
+              transition={{ type: "spring", damping: 25, stiffness: 200 }}
+              className="w-full md:w-66 bg-white flex-shrink-0 flex flex-col gap-4 mb-4 md:mb-0 fixed md:top-28 left-0 md:left-auto md:sticky p-6 rounded-2xl shadow-xl z-[999] max-h-[80vh] overflow-y-auto"
+            >
+              <h3 className="font-bold text-xl mb-4 text-orange-600 border-b pb-3 text-center md:text-left">
+                Product Categories
+              </h3>
+              <button
+                onClick={() => fetchProductsByCategory("")}
+                className={`w-full text-left px-4 py-2 flex items-center justify-center md:justify-start rounded-lg font-medium transition group ${
+                  selectedCategory === ""
+                    ? "bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-lg border-l-4 border-orange-700"
+                    : "bg-gray-50 text-gray-800 hover:bg-gray-100"
+                }`}
+              >
+                {sidebarIcon.All}
+                All
+              </button>
+              {categories.map((cat) => (
+                <button
+                  key={cat}
+                  onClick={() => fetchProductsByCategory(cat)}
+                  className={`w-full text-left px-4 py-2 flex items-center justify-center md:justify-start rounded-lg font-medium transition group ${
+                    selectedCategory === cat
+                      ? "bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-lg border-l-4 border-orange-700"
+                      : "bg-gray-50 text-gray-800 hover:bg-gray-100"
+                  }`}
+                >
+                  {sidebarIcon.Default}
+                  {cat}
+                </button>
+              ))}
+            </motion.aside>
+          )}
+        </AnimatePresence>
+
+        {/* Main Content */}
+        <div className="flex-1">
+          {/* Types Filter */}
+          <div className="flex justify-center flex-wrap gap-3 mb-10 mt-8">
             <button
-              key={type}
-              onClick={() => fetchProductsByType(type)}
+              onClick={() => fetchProductsByType("")}
               className={`px-4 sm:px-5 py-2.5 rounded-full font-bold transition shadow flex items-center gap-2 text-sm sm:text-base ${
-                selectedType === type
+                selectedType === ""
                   ? "bg-gradient-to-r from-orange-500 to-orange-600 text-white"
                   : "bg-gray-100 text-gray-800 hover:bg-gray-200"
               }`}
             >
               <Layers size={17} />
-              {type.toUpperCase()}
+              All Types
             </button>
-          ))}
-        </div>
+            {types.map((type) => (
+              <button
+                key={type}
+                onClick={() => fetchProductsByType(type)}
+                className={`px-4 sm:px-5 py-2.5 rounded-full font-bold transition shadow flex items-center gap-2 text-sm sm:text-base ${
+                  selectedType === type
+                    ? "bg-gradient-to-r from-orange-500 to-orange-600 text-white"
+                    : "bg-gray-100 text-gray-800 hover:bg-gray-200"
+                }`}
+              >
+                <Layers size={17} />
+                {type.toUpperCase()}
+              </button>
+            ))}
+          </div>
 
-        {/* Products Grid */}
-        <motion.div
-          className="grid gap-6 sm:gap-8 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
-          initial="hidden"
-          animate="visible"
-          variants={{
-            hidden: {},
-            visible: {
-              transition: {
-                staggerChildren: 0.08,
+          {/* Products Grid */}
+          <motion.div
+            className="grid gap-6 sm:gap-8 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
+            initial="hidden"
+            animate="visible"
+            variants={{
+              hidden: {},
+              visible: {
+                transition: {
+                  staggerChildren: 0.08,
+                },
               },
-            },
-          }}
-        >
-          {products.map((product) => (
-            <motion.div
-              key={product._id || product.sku}
-              whileHover={{
-                scale: 1.04,
-                boxShadow: "0 12px 32px rgba(255,140,0,0.10)",
-                borderColor: "#fb923c",
-              }}
-              variants={{
-                hidden: { opacity: 0, y: 20 },
-                visible: { opacity: 1, y: 0 },
-              }}
-              className="bg-white rounded-2xl overflow-hidden shadow-lg border border-transparent flex flex-col transition-all duration-300 cursor-pointer"
-            >
-              <div className="relative group overflow-hidden rounded-t-2xl">
-                <motion.img
-                  src={product.image}
-                  alt={product.title}
-                  className="w-full h-60 sm:h-64 object-cover rounded-t-2xl transition-transform duration-500 group-hover:scale-110 brightness-105 contrast-110"
-                  onClick={() => setSelectedImage(product.image)}
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all duration-300">
-                  <LucideImage size={32} className="text-white opacity-80" />
-                </div>
-              </div>
-
-              <div className="p-4 sm:p-5 flex-1 flex flex-col justify-between">
-                <div>
-                  <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-2 line-clamp-2 text-center sm:text-left">
-                    {product.title}
-                  </h3>
-                  <p className="text-sm text-gray-500 mb-1 text-center sm:text-left">
-                    <span className="font-semibold text-gray-700">Category:</span>{" "}
-                    {product.category}
-                  </p>
-                  <p className="text-xs text-gray-400 mb-2 text-center sm:text-left">
-                    <span className="font-medium">Code:</span> {product.sku}
-                  </p>
-                  <div className="flex flex-col sm:flex-row items-center justify-between mt-3 gap-2 sm:gap-0">
-                    <span className="text-orange-600 font-bold text-lg">
-                      &#8377;{product.price}
-                    </span>
-                    <span
-                      className={`px-3 py-1 text-xs rounded-full font-semibold ${
-                        product.types === "premium"
-                          ? "bg-yellow-400 text-gray-900"
-                          : "bg-orange-100 text-orange-600"
-                      }`}
-                    >
-                      {product.types.toUpperCase()}
-                    </span>
+            }}
+          >
+            {products.map((product) => (
+              <motion.div
+                key={product._id || product.sku}
+                whileHover={{
+                  scale: 1.04,
+                  boxShadow: "0 12px 32px rgba(255,140,0,0.10)",
+                  borderColor: "#fb923c",
+                }}
+                variants={{
+                  hidden: { opacity: 0, y: 20 },
+                  visible: { opacity: 1, y: 0 },
+                }}
+                className="bg-white rounded-2xl overflow-hidden shadow-lg border border-transparent flex flex-col transition-all duration-300"
+              >
+                <div className="relative group overflow-hidden rounded-t-2xl">
+                  <motion.img
+                    src={product.image}
+                    alt={product.title}
+                    className="w-full h-60 sm:h-64 object-cover rounded-t-2xl transition-transform duration-500 group-hover:scale-110 brightness-105 contrast-110 cursor-pointer"
+                    onClick={() => openImageModal(product.image, product.title)}
+                  />
+                  <div
+                    className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all duration-300 cursor-pointer"
+                    onClick={() => openImageModal(product.image, product.title)}
+                  >
+                    <FaThLarge size={32} className="text-white opacity-80" />
                   </div>
                 </div>
 
-                <div className="flex justify-center sm:justify-end mt-5">
-                  <motion.button
-                    onClick={() =>
-                      addToCart(
-                        product._id,
-                        product.image,
-                        product.title,
-                        product.price
-                      )
-                    }
-                    whileTap={{ scale: 0.96 }}
-                    className="bg-gradient-to-r from-orange-500 to-orange-600 text-white py-2 px-4 sm:px-5 cursor-pointer rounded-xl shadow-lg hover:from-orange-600 hover:to-orange-700 transition-all font-bold text-sm sm:text-base flex items-center gap-2"
-                  >
-                    <FaShoppingBag /> Add
-                  </motion.button>
-                </div>
-              </div>
-            </motion.div>
-          ))}
-        </motion.div>
+                <div className="p-4 sm:p-5 flex-1 flex flex-col justify-between">
+                  <div>
+                    <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-2 line-clamp-2 text-center sm:text-left">
+                      {product.title}
+                    </h3>
+                    <p className="text-sm text-gray-500 mb-1 text-center sm:text-left">
+                      <span className="font-semibold text-gray-700">
+                        Category:
+                      </span>{" "}
+                      {product.category}
+                    </p>
+                    <p className="text-xs text-gray-400 mb-2 text-center sm:text-left">
+                      <span className="font-medium">Code:</span> {product.sku}
+                    </p>
+                    <div className="flex flex-col sm:flex-row items-center justify-between mt-3 gap-2 sm:gap-0">
+                      <span className="text-orange-600 font-bold text-lg">
+                        &#8377;{product.price}
+                      </span>
+                      <span
+                        className={`px-3 py-1 text-xs rounded-full font-semibold ${
+                          product.types === "premium"
+                            ? "bg-yellow-400 text-gray-900"
+                            : "bg-orange-100 text-orange-600"
+                        }`}
+                      >
+                        {product.types.toUpperCase()}
+                      </span>
+                    </div>
+                  </div>
 
-        {/* Fullscreen Image Modal */}
-        <AnimatePresence>
-          {selectedImage && (
-            <motion.div
-              className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 px-4"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setSelectedImage(null)}
-            >
-              <button
-                onClick={() => setSelectedImage(null)}
-                className="absolute top-5 right-5 text-white bg-black/50 rounded-full p-3 hover:bg-black transition"
-              >
-                <X size={28} />
-              </button>
-              <motion.img
-                src={selectedImage}
-                alt="Fullscreen"
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                className="max-h-[85vh] max-w-full object-contain rounded-2xl shadow-2xl"
-                onClick={(e) => e.stopPropagation()}
-              />
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-    </section>
+                  <div className="flex justify-center sm:justify-end mt-5">
+                    <motion.button
+                      onClick={() =>
+                        addToCart(
+                          product._id,
+                          product.image,
+                          product.title,
+                          product.price
+                        )
+                      }
+                      whileTap={{ scale: 0.96 }}
+                      className="bg-gradient-to-r from-orange-500 to-orange-600 text-white py-2 px-4 sm:px-5 cursor-pointer rounded-xl shadow-lg hover:from-orange-600 hover:to-orange-700 transition-all font-bold text-sm sm:text-base flex items-center gap-2"
+                    >
+                      <FaShoppingBag /> Add
+                    </motion.button>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </motion.div>
+        </div>
+      </section>
+    </>
   );
 };
 
