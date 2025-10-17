@@ -17,11 +17,10 @@ const About = () => {
             <FaCrown className="text-yellow-500" /> About Us
           </h2>
           <p className="text-gray-600 leading-relaxed mb-4">
-            Welcome to <span className="font-semibold text-gray-900">Luxura Kitchenware</span>, where elegance meets functionality. We provide premium kitchenware that enhances every cooking experience with style and performance.
+          At Cuiluxe, we believe every kitchen deserves a touch of perfection. We offer a complete range of kitchen essentials, dining, and serveware designed to bring beauty, comfort, and convenience into your home. Our team personally connects with each customer, helping them choose the right products, delivering everything directly, and arranging it to perfection — so your kitchen is not just functional, but truly complete.
+          From elegant dinnerware to everyday kitchen tools, Cuiluxe combines quality, style, and service to create the ultimate kitchen experience — because your kitchen deserves luxury, simplified.
           </p>
-          <p className="text-gray-600 leading-relaxed">
-            Our mission is to inspire chefs and home cooks alike by creating tools that are beautiful, durable, and thoughtfully designed for modern kitchens.
-          </p>
+         
         </motion.div>
 
         <motion.div

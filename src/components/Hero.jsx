@@ -21,20 +21,19 @@ const Hero = () => {
           initial={{ opacity: 0, y: -40 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1 }}
-          className="text-4xl sm:text-5xl lg:text-[65px] font-extrabold leading-tight"
+          className="text-3xl sm:text-3xl lg:text-[45px] font-extrabold leading-tight"
         >
-          Elevate Your Cooking  
-          <span className="block text-white/90 mt-2">With Premium Tools</span>
+          Crafted Elegance in Kitchen Essentials,
+          <span className="block text-white/90 mt-2">Dining & Serveware</span>
         </motion.h1>
 
         <motion.p
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1, delay: 0.3 }}
-          className="mt-6 text-lg sm:text-xl text-white/80 max-w-2xl"
+          className="mt-6 text-lg sm:text-md text-white/80 max-w-2xl"
         >
-          Luxura Kitchenware combines elegance, precision, and lasting performance.  
-          Experience the art of cooking with tools designed for masters.
+          Get complete kitchen solutions with Cuiluxe. From essentials to dining and serveware, we deliver and arrange everything perfectly for your home.
         </motion.p>
 
         <motion.div
