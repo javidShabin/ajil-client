@@ -106,15 +106,6 @@ const AdminHeader = () => {
               >
                 View Profile
               </Link>
-              <Link
-                to="/admin/settings"
-                className="block px-4 py-2 hover:bg-orange-50 hover:text-orange-500 transition-all duration-200"
-                onClick={() => setShowProfileMenu(false)}
-              >
-                <div className="flex items-center gap-2">
-                  <Settings size={16} /> Settings
-                </div>
-              </Link>
               <hr className="my-1 border-orange-100" />
               <button
                 onClick={handleLogout}
@@ -127,49 +118,7 @@ const AdminHeader = () => {
         </div>
       </header>
 
-      {/* MOBILE PROFILE BUTTON (Top Right Floating) */}
-      {/* <div
-        className="fixed top-4 right-4 z-50 md:hidden"
-        ref={menuRef}
-      >
-        <button
-          onClick={() => setShowProfileMenu(!showProfileMenu)}
-          className="p-3 bg-gradient-to-r from-orange-400 to-amber-500 text-white rounded-full shadow-lg hover:scale-105 transition-all duration-300"
-        >
-          <User size={20} />
-        </button>
-
-        {showProfileMenu && (
-          <div
-            className="absolute top-12 right-0 w-48 bg-white/95 backdrop-blur-xl border border-orange-200 rounded-2xl shadow-xl py-2 text-gray-700 font-medium animate-fade-in"
-          >
-            <Link
-              to="/admin/profile"
-              className="block px-4 py-2 hover:bg-orange-50 hover:text-orange-500 transition-all duration-200 text-center"
-              onClick={() => setShowProfileMenu(false)}
-            >
-              View Profile
-            </Link>
-            <Link
-              to="/admin/settings"
-              className="block px-4 py-2 hover:bg-orange-50 hover:text-orange-500 transition-all duration-200 text-center"
-              onClick={() => setShowProfileMenu(false)}
-            >
-              <div className="flex items-center justify-center gap-2">
-                <Settings size={16} /> Settings
-              </div>
-            </Link>
-            <hr className="my-1 border-orange-100" />
-            <button
-              onClick={handleLogout}
-              className="w-full text-center px-4 py-2 text-red-500 hover:bg-red-50 transition-all duration-200 flex items-center justify-center gap-2"
-            >
-              <LogOut size={16} /> Logout
-            </button>
-          </div>
-        )}
-      </div> */}
-
+    
       {/* MOBILE BOTTOM NAVBAR */}
       <div
         className="fixed bottom-3 left-1/2 -translate-x-1/2 w-[90%] bg-black/90 backdrop-blur-xl border border-orange-200 shadow-lg rounded-3xl px-6 py-3 flex justify-around items-center text-gray-800 font-semibold md:hidden z-40"

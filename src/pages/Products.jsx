@@ -53,7 +53,7 @@ const ProductSection = () => {
             );
 
       setProducts(res.data);
-      console.log(res, "====types")
+      console.log(res, "====types");
       setCategories([...new Set(res.data.map((p) => p.category))]);
       setLoading(false);
     } catch (error) {
@@ -223,7 +223,7 @@ const ProductSection = () => {
                 <motion.img
                   src={product.image}
                   alt={product.title}
-                  className="w-full h-48 sm:h-52 object-cover rounded-t-2xl transition-transform duration-500 group-hover:scale-110"
+                  className="w-full h-60 sm:h-64 object-cover rounded-t-2xl transition-transform duration-500 group-hover:scale-110 brightness-105 contrast-110"
                   onClick={() => setSelectedImage(product.image)}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all duration-300">
