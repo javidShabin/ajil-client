@@ -57,7 +57,7 @@ const AdminHeader = () => {
         </Link>
 
         {/* Desktop Nav */}
-        <nav className="hidden md:flex items-center space-x-8 text-white font-semibold text-base lg:text-lg">
+        <nav className="hidden md:flex items-center space-x-8 text-black font-semibold text-base lg:text-lg">
           <Link
             to="/"
             className={`hover:text-orange-400 transition-all duration-200 ${

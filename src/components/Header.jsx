@@ -75,7 +75,7 @@ const Header = () => {
 
       {/* Mobile Menu Button */}
       <div
-        className="md:hidden text-white cursor-pointer hover:text-orange-400 transition-colors duration-200"
+        className="md:hidden text-black cursor-pointer hover:text-orange-400 transition-colors duration-200"
         onClick={() => setOpen(!open)}
         aria-label={open ? "Close menu" : "Open menu"}
       >

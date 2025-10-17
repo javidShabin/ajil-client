@@ -126,16 +126,7 @@ const Login = () => {
           </motion.button>
         </form>
 
-        {/* Footer */}
-        <p className="text-gray-600 mt-6 text-sm">
-          Don’t have an account?{" "}
-          <Link
-            to="/register"
-            className="text-orange-500 hover:underline hover:text-orange-600 font-medium"
-          >
-            Sign Up
-          </Link>
-        </p>
+        
       </motion.div>
     </section>
   );
