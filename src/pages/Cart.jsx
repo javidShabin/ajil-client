@@ -15,12 +15,13 @@ const Cart = () => {
     const getCart = async () => {
       try {
         const response = await axiosInstance.get("/cart/get-cart");
-        const items = response.data.cart.items || [];
+        const items = response.data.cart?.items || [];
         setCartItems(items);
         const total = items.reduce((acc, item) => acc + item.quantity * item.price, 0);
         setTotalPrice(total);
       } catch (error) {
-        console.log(error);
+        console.error("Error loading cart:", error);
+        toast.error("Failed to load cart items");
       }
     };
     getCart();
@@ -32,11 +33,12 @@ const Cart = () => {
         productId,
         action: "increase",
       });
-      const items = response.data.cart.items || [];
+      const items = response.data.cart?.items || [];
       setCartItems(items);
       setTotalPrice(items.reduce((acc, i) => acc + i.quantity * i.price, 0));
     } catch (error) {
-      console.log(error);
+      console.error("Error increasing quantity:", error);
+      toast.error("Failed to update quantity");
     }
   };
 
@@ -46,25 +48,35 @@ const Cart = () => {
         productId,
         action: "decrease",
       });
-      const items = response.data.cart.items || [];
+      const items = response.data.cart?.items || [];
       setCartItems(items);
       setTotalPrice(items.reduce((acc, i) => acc + i.quantity * i.price, 0));
     } catch (error) {
-      console.log(error);
+      console.error("Error decreasing quantity:", error);
+      toast.error("Failed to update quantity");
     }
   };
 
   const handleRemove = async (productId) => {
+    console.log(productId)
     try {
-      const response = await axiosInstance.delete("/cart/remove-item", {
-        data: { productId },
+      const response = await axiosInstance.delete('/cart/remove-item', {
+        data: {productId}
       });
-      toast.success(response.data.message);
-      const items = response.data.cart.items || [];
+      
+      if (response.data && response.data.message) {
+        toast.success(response.data.message);
+      } else {
+        toast.success("Product removed from cart");
+      }
+      
+      // Update cart items and total price
+      const items = response.data.cart?.items || [];
       setCartItems(items);
       setTotalPrice(items.reduce((acc, i) => acc + i.quantity * i.price, 0));
     } catch (error) {
-      console.log(error);
+      console.error("Error removing product:", error);
+      toast.error(error.response?.data?.message || "Failed to remove product from cart");
     }
   };
   
@@ -89,7 +101,7 @@ const handleCheckout = () => {
   doc.setTextColor(255, 255, 255);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(22);
-  doc.text("LuxuryStore Invoice", pageWidth / 2, 20, { align: "center" });
+  doc.text("Cuiluxe Invoice", pageWidth / 2, 20, { align: "center" });
   doc.setFontSize(12);
   doc.text("Your trusted premium store", pageWidth / 2, 30, { align: "center" });
 
@@ -106,9 +118,9 @@ const handleCheckout = () => {
   const tableRows = cartItems.map((item, index) => [
     index + 1,
     item.itemName,
-    `$${item.price.toFixed(2)}`,
+    `INR ${item.price.toFixed(2)}`,
     item.quantity,
-    `$${(item.price * item.quantity).toFixed(2)}`
+    `INR ${(item.price * item.quantity).toFixed(2)}`
   ]);
 
   doc.autoTable({
@@ -131,9 +143,9 @@ const handleCheckout = () => {
 
   const finalY = doc.lastAutoTable.finalY + 10;
   doc.setFontSize(14);
-  doc.setFont("helvetica", "bold");
+  doc.setFont("poppins", "bold");
   doc.setTextColor(249, 115, 22);
-  doc.text(`Grand Total: $${totalPrice.toFixed(2)}`, 14, finalY);
+  doc.text(`Grand Total: INR ${totalPrice.toFixed(2)}`, 14, finalY);
 
   doc.save("LuxuryStore_Invoice.pdf");
 };
