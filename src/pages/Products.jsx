@@ -25,6 +25,7 @@ const ProductSection = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(20);
   const [totalProducts, setTotalProducts] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
   const [allProducts, setAllProducts] = useState([]);
   const [isMobile, setIsMobile] = useState(false);
 
@@ -53,19 +54,21 @@ const ProductSection = () => {
   const fetchProducts = async (page = 1) => {
     try {
       setLoading(true);
-      const res = await axiosInstance.get("/product/get-all-products");
-      const allProductsData = res.data;
+      const res = await axiosInstance.get(`/product/get-all-products?page=${page}&limit=${itemsPerPage}`);
+      const data = res.data;
+      
+      setProducts(data.products);
+      setTotalProducts(data.pagination.totalProducts);
+      setTotalPages(data.pagination.totalPages);
+      setCurrentPage(page);
+      
+      // For categories and types, we need to fetch all products without pagination
+      const allRes = await axiosInstance.get("/product/get-all-products?page=1&limit=1000");
+      const allProductsData = allRes.data.products;
       setAllProducts(allProductsData);
-      setTotalProducts(allProductsData.length);
       setTypes([...new Set(allProductsData.map((p) => p.types))]);
       setCategories([...new Set(allProductsData.map((p) => p.category))]);
       
-      // Calculate pagination
-      const startIndex = (page - 1) * itemsPerPage;
-      const endIndex = startIndex + itemsPerPage;
-      const paginatedProducts = allProductsData.slice(startIndex, endIndex);
-      setProducts(paginatedProducts);
-      setCurrentPage(page);
       setLoading(false);
     } catch (error) {
       console.error(error);
@@ -80,12 +83,15 @@ const ProductSection = () => {
       setSelectedCategory("");
       setLoading(true);
 
-      const res =
-        type === ""
-          ? await axiosInstance.get("/product/get-all-products")
-          : await axiosInstance.get(
-              `/product/filter-type?type=${encodeURIComponent(type)}`
-            );
+      if (type === "") {
+        // Reset to show all products with pagination
+        fetchProducts(1);
+        return;
+      }
+
+      const res = await axiosInstance.get(
+        `/product/filter-type?type=${encodeURIComponent(type)}`
+      );
 
       const filteredProducts = res.data;
       setAllProducts(filteredProducts);
@@ -98,6 +104,7 @@ const ProductSection = () => {
       const paginatedProducts = filteredProducts.slice(startIndex, endIndex);
       setProducts(paginatedProducts);
       setCurrentPage(1);
+      setTotalPages(Math.ceil(filteredProducts.length / itemsPerPage));
       setLoading(false);
     } catch (error) {
       console.error(error);
@@ -110,6 +117,12 @@ const ProductSection = () => {
     try {
       setSelectedCategory(category);
       setLoading(true);
+
+      if (category === "") {
+        // Reset to show all products with pagination
+        fetchProducts(1);
+        return;
+      }
 
       let url = "/product/get-all-products";
       if (selectedType && selectedType !== "") {
@@ -134,6 +147,7 @@ const ProductSection = () => {
       const paginatedProducts = filteredProducts.slice(startIndex, endIndex);
       setProducts(paginatedProducts);
       setCurrentPage(1);
+      setTotalPages(Math.ceil(filteredProducts.length / itemsPerPage));
       setLoading(false);
       
       // Close sidebar on mobile after category selection
@@ -171,15 +185,20 @@ const ProductSection = () => {
 
   // Pagination functions
   const goToPage = (page) => {
-    const startIndex = (page - 1) * itemsPerPage;
-    const endIndex = startIndex + itemsPerPage;
-    const paginatedProducts = allProducts.slice(startIndex, endIndex);
-    setProducts(paginatedProducts);
-    setCurrentPage(page);
+    if (selectedType === "" && selectedCategory === "") {
+      // Use server-side pagination for all products
+      fetchProducts(page);
+    } else {
+      // Use client-side pagination for filtered results
+      const startIndex = (page - 1) * itemsPerPage;
+      const endIndex = startIndex + itemsPerPage;
+      const paginatedProducts = allProducts.slice(startIndex, endIndex);
+      setProducts(paginatedProducts);
+      setCurrentPage(page);
+    }
   };
 
   const goToNextPage = () => {
-    const totalPages = Math.ceil(totalProducts / itemsPerPage);
     if (currentPage < totalPages) {
       goToPage(currentPage + 1);
     }
@@ -190,8 +209,6 @@ const ProductSection = () => {
       goToPage(currentPage - 1);
     }
   };
-
-  const totalPages = Math.ceil(totalProducts / itemsPerPage);
 
   if (loading) {
     return (

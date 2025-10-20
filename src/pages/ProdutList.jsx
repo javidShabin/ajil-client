@@ -12,6 +12,8 @@ const ProductList = () => {
   const [deleteId, setDeleteId] = useState(null);
   const [editProduct, setEditProduct] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalProducts, setTotalProducts] = useState(0);
   const pageSize = 20;
   const navigate = useNavigate();
 
@@ -19,36 +21,40 @@ const ProductList = () => {
 
 
   useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        setLoading(true);
-        const res = await axiosInstance.get("/product/get-all-products");
-        setProducts(res.data);
-  
-        setLoading(false);
-      } catch (error) {
-        console.error(error);
-        toast.error("Failed to fetch products");
-        setLoading(false);
-      }
-    };
-    fetchProducts();
-  }, []);
+    fetchProducts(currentPage);
+  }, [currentPage]);
+
+  const fetchProducts = async (page = 1) => {
+    try {
+      setLoading(true);
+      const res = await axiosInstance.get(`/product/get-all-products?page=${page}&limit=${pageSize}`);
+      const data = res.data;
+      
+      setProducts(data.products);
+      setTotalPages(data.pagination.totalPages);
+      setTotalProducts(data.pagination.totalProducts);
+      setLoading(false);
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to fetch products");
+      setLoading(false);
+    }
+  };
 
   // Ensure current page is valid when the products list changes
   useEffect(() => {
-    const totalPages = Math.max(1, Math.ceil(products.length / pageSize));
-    if (currentPage > totalPages) {
+    if (currentPage > totalPages && totalPages > 0) {
       setCurrentPage(totalPages);
     }
-  }, [products, currentPage]);
+  }, [totalPages, currentPage]);
 
   const confirmDelete = (id) => setDeleteId(id);
 
   const handleRemove = async () => {
     try {
       await axiosInstance.delete(`/product/delete-product/${deleteId}`);
-      setProducts(products.filter((p) => p._id !== deleteId));
+      // Refresh the current page after deletion
+      fetchProducts(currentPage);
       toast.success("Product removed successfully");
       setDeleteId(null);
     } catch (error) {
@@ -78,12 +84,8 @@ const ProductList = () => {
         { headers: { "Content-Type": "multipart/form-data" } }
       );
 
-      // Update the product in local state
-      setProducts(
-        products.map((p) =>
-          p._id === editProduct._id ? { ...p, ...res.data } : p
-        )
-      );
+      // Refresh the current page after update
+      fetchProducts(currentPage);
       toast.success("Product updated successfully");
       setEditProduct(null);
     } catch (error) {
@@ -94,10 +96,8 @@ const ProductList = () => {
 
   const handleAddMenu = () => navigate("/admin/add-product");
 
-  const totalPages = Math.max(1, Math.ceil(products.length / pageSize));
   const startIndex = (currentPage - 1) * pageSize;
-  const endIndex = startIndex + pageSize;
-  const paginatedProducts = products.slice(startIndex, endIndex);
+  const endIndex = Math.min(startIndex + pageSize, totalProducts);
 
   const goToPage = (page) => {
     if (page < 1 || page > totalPages) return;
@@ -124,7 +124,7 @@ const ProductList = () => {
       ) : (
         <>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
-          {paginatedProducts.map((product) => (
+          {products.map((product) => (
             <div
               key={product._id}
               className="bg-white rounded-2xl shadow-md hover:shadow-2xl transition-all duration-300 p-4 flex flex-col justify-between border border-gray-100 hover:-translate-y-1"
@@ -173,12 +173,8 @@ const ProductList = () => {
         <div className="mt-10">
           <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-between">
             <p className="text-xs sm:text-sm text-gray-500">
-              Showing <span className="font-semibold text-gray-700">{products.length === 0 ? 0 : startIndex + 1}</span>
-              
-              
-              
-              
-               – <span className="font-semibold text-gray-700">{Math.min(endIndex, products.length)}</span> of <span className="font-semibold text-gray-700">{products.length}</span>
+              Showing <span className="font-semibold text-gray-700">{totalProducts === 0 ? 0 : startIndex + 1}</span>
+              – <span className="font-semibold text-gray-700">{endIndex}</span> of <span className="font-semibold text-gray-700">{totalProducts}</span>
             </p>
             <div className="w-full sm:w-auto overflow-x-auto">
               <div className="inline-flex items-center gap-2 whitespace-nowrap select-none">
