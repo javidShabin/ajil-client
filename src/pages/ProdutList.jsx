@@ -11,6 +11,8 @@ const ProductList = () => {
   const [loading, setLoading] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
   const [editProduct, setEditProduct] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 20;
   const navigate = useNavigate();
 
   const { register, handleSubmit, reset } = useForm();
@@ -32,6 +34,14 @@ const ProductList = () => {
     };
     fetchProducts();
   }, []);
+
+  // Ensure current page is valid when the products list changes
+  useEffect(() => {
+    const totalPages = Math.max(1, Math.ceil(products.length / pageSize));
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [products, currentPage]);
 
   const confirmDelete = (id) => setDeleteId(id);
 
@@ -84,6 +94,17 @@ const ProductList = () => {
 
   const handleAddMenu = () => navigate("/admin/add-product");
 
+  const totalPages = Math.max(1, Math.ceil(products.length / pageSize));
+  const startIndex = (currentPage - 1) * pageSize;
+  const endIndex = startIndex + pageSize;
+  const paginatedProducts = products.slice(startIndex, endIndex);
+
+  const goToPage = (page) => {
+    if (page < 1 || page > totalPages) return;
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   return (
     <section className="max-w-7xl mx-auto px-4 py-12 mt-24 relative">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-3 sm:gap-0">
@@ -98,9 +119,12 @@ const ProductList = () => {
 
       {loading ? (
         <p className="text-center text-gray-500 text-lg font-medium animate-pulse">Loading products...</p>
+      ) : products.length === 0 ? (
+        <p className="text-center text-gray-500 text-lg font-medium">No products found.</p>
       ) : (
+        <>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
-          {products.map((product) => (
+          {paginatedProducts.map((product) => (
             <div
               key={product._id}
               className="bg-white rounded-2xl shadow-md hover:shadow-2xl transition-all duration-300 p-4 flex flex-col justify-between border border-gray-100 hover:-translate-y-1"
@@ -144,6 +168,65 @@ const ProductList = () => {
             </div>
           ))}
         </div>
+
+        {/* Pagination controls */}
+        <div className="mt-10">
+          <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-between">
+            <p className="text-xs sm:text-sm text-gray-500">
+              Showing <span className="font-semibold text-gray-700">{products.length === 0 ? 0 : startIndex + 1}</span>
+              
+              
+              
+              
+               – <span className="font-semibold text-gray-700">{Math.min(endIndex, products.length)}</span> of <span className="font-semibold text-gray-700">{products.length}</span>
+            </p>
+            <div className="w-full sm:w-auto overflow-x-auto">
+              <div className="inline-flex items-center gap-2 whitespace-nowrap select-none">
+                <button
+                  aria-label="Previous page"
+                  onClick={() => goToPage(currentPage - 1)}
+                  disabled={currentPage === 1}
+                  className={`px-2 sm:px-3 py-2 rounded-lg text-xs sm:text-sm font-medium border ${
+                    currentPage === 1
+                      ? "text-gray-400 border-gray-200 cursor-not-allowed"
+                      : "text-gray-700 border-gray-300 hover:bg-gray-50"
+                  }`}
+                >
+                  Prev
+                </button>
+
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                  <button
+                    aria-label={`Go to page ${page}`}
+                    key={page}
+                    onClick={() => goToPage(page)}
+                    className={`min-w-[2.25rem] px-2 sm:px-3 py-2 rounded-lg text-xs sm:text-sm font-medium border text-center ${
+                      currentPage === page
+                        ? "bg-orange-500 border-orange-500 text-white"
+                        : "text-gray-700 border-gray-300 hover:bg-gray-50"
+                    }`}
+                  >
+                    {page}
+                  </button>
+                ))}
+
+                <button
+                  aria-label="Next page"
+                  onClick={() => goToPage(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                  className={`px-2 sm:px-3 py-2 rounded-lg text-xs sm:text-sm font-medium border ${
+                    currentPage === totalPages
+                      ? "text-gray-400 border-gray-200 cursor-not-allowed"
+                      : "text-gray-700 border-gray-300 hover:bg-gray-50"
+                  }`}
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        </>
       )}
 
       <AnimatePresence>
