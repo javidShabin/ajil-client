@@ -83,12 +83,6 @@ const ProductSection = () => {
       setSelectedCategory("");
       setLoading(true);
 
-      if (type === "") {
-        // Reset to show all products with pagination
-        fetchProducts(1);
-        return;
-      }
-
       const res = await axiosInstance.get(
         `/product/filter-type?type=${encodeURIComponent(type)}`
       );
@@ -117,12 +111,6 @@ const ProductSection = () => {
     try {
       setSelectedCategory(category);
       setLoading(true);
-
-      if (category === "") {
-        // Reset to show all products with pagination
-        fetchProducts(1);
-        return;
-      }
 
       let url = "/product/get-all-products";
       if (selectedType && selectedType !== "") {
@@ -185,7 +173,7 @@ const ProductSection = () => {
 
   // Pagination functions
   const goToPage = (page) => {
-    if (selectedType === "" && selectedCategory === "") {
+    if (!selectedType && !selectedCategory) {
       // Use server-side pagination for all products
       fetchProducts(page);
     } else {
@@ -301,17 +289,6 @@ const ProductSection = () => {
                   <X size={20} />
                 </button>
               </div>
-              <button
-                onClick={() => fetchProductsByCategory("")}
-                className={`w-full text-left px-4 py-2 flex items-center justify-center md:justify-start rounded-lg font-medium transition group ${
-                  selectedCategory === ""
-                    ? "bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-lg border-l-4 border-orange-700"
-                    : "bg-gray-50 text-gray-800 hover:bg-gray-100"
-                }`}
-              >
-                {sidebarIcon.All}
-                All
-              </button>
               {categories.map((cat) => (
                 <button
                   key={cat}
@@ -334,17 +311,6 @@ const ProductSection = () => {
         <div className="flex-1">
           {/* Types Filter */}
           <div className="flex justify-center flex-wrap gap-3 mb-10 mt-8">
-            <button
-              onClick={() => fetchProductsByType("")}
-              className={`px-4 sm:px-5 py-2.5 rounded-full font-bold transition shadow flex items-center gap-2 text-sm sm:text-base ${
-                selectedType === ""
-                  ? "bg-gradient-to-r from-orange-500 to-orange-600 text-white"
-                  : "bg-gray-100 text-gray-800 hover:bg-gray-200"
-              }`}
-            >
-              <Layers size={17} />
-              All Types
-            </button>
             {types.map((type) => (
               <button
                 key={type}
