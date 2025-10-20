@@ -112,6 +112,32 @@ const ProductSection = () => {
       setSelectedCategory(category);
       setLoading(true);
 
+      if (category === "") {
+        // Show all products for the selected type
+        if (selectedType) {
+          const res = await axiosInstance.get(
+            `/product/filter-type?type=${encodeURIComponent(selectedType)}`
+          );
+          const filteredProducts = res.data;
+          setAllProducts(filteredProducts);
+          setTotalProducts(filteredProducts.length);
+          setCategories([...new Set(filteredProducts.map((p) => p.category))]);
+          
+          // Reset to first page and apply pagination
+          const startIndex = 0;
+          const endIndex = itemsPerPage;
+          const paginatedProducts = filteredProducts.slice(startIndex, endIndex);
+          setProducts(paginatedProducts);
+          setCurrentPage(1);
+          setTotalPages(Math.ceil(filteredProducts.length / itemsPerPage));
+        } else {
+          // Show all products with server-side pagination
+          fetchProducts(1);
+        }
+        setLoading(false);
+        return;
+      }
+
       let url = "/product/get-all-products";
       if (selectedType && selectedType !== "") {
         url = `/product/filter-type?type=${encodeURIComponent(selectedType)}`;
@@ -289,6 +315,17 @@ const ProductSection = () => {
                   <X size={20} />
                 </button>
               </div>
+              <button
+                onClick={() => fetchProductsByCategory("")}
+                className={`w-full text-left px-4 py-2 flex items-center justify-center md:justify-start rounded-lg font-medium transition group ${
+                  selectedCategory === ""
+                    ? "bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-lg border-l-4 border-orange-700"
+                    : "bg-gray-50 text-gray-800 hover:bg-gray-100"
+                }`}
+              >
+                {sidebarIcon.All}
+                All
+              </button>
               {categories.map((cat) => (
                 <button
                   key={cat}
