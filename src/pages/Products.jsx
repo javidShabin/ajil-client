@@ -17,21 +17,55 @@ const ProductSection = () => {
   const [selectedCategory, setSelectedCategory] = useState("");
   const [types, setTypes] = useState([]);
   const [selectedType, setSelectedType] = useState("");
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+  
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(20);
+  const [totalProducts, setTotalProducts] = useState(0);
+  const [allProducts, setAllProducts] = useState([]);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
     fetchProducts();
   }, []);
 
-  const fetchProducts = async () => {
+  // Show sidebar by default on desktop screens and handle mobile detection
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 768) {
+        setSidebarOpen(true);
+        setIsMobile(false);
+      } else {
+        setSidebarOpen(false);
+        setIsMobile(true);
+      }
+    };
+
+    handleResize(); // Set initial state
+    window.addEventListener('resize', handleResize);
+    
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const fetchProducts = async (page = 1) => {
     try {
       setLoading(true);
       const res = await axiosInstance.get("/product/get-all-products");
-      setProducts(res.data);
-      setTypes([...new Set(res.data.map((p) => p.types))]);
-      setCategories([...new Set(res.data.map((p) => p.category))]);
+      const allProductsData = res.data;
+      setAllProducts(allProductsData);
+      setTotalProducts(allProductsData.length);
+      setTypes([...new Set(allProductsData.map((p) => p.types))]);
+      setCategories([...new Set(allProductsData.map((p) => p.category))]);
+      
+      // Calculate pagination
+      const startIndex = (page - 1) * itemsPerPage;
+      const endIndex = startIndex + itemsPerPage;
+      const paginatedProducts = allProductsData.slice(startIndex, endIndex);
+      setProducts(paginatedProducts);
+      setCurrentPage(page);
       setLoading(false);
     } catch (error) {
       console.error(error);
@@ -53,8 +87,17 @@ const ProductSection = () => {
               `/product/filter-type?type=${encodeURIComponent(type)}`
             );
 
-      setProducts(res.data);
-      setCategories([...new Set(res.data.map((p) => p.category))]);
+      const filteredProducts = res.data;
+      setAllProducts(filteredProducts);
+      setTotalProducts(filteredProducts.length);
+      setCategories([...new Set(filteredProducts.map((p) => p.category))]);
+      
+      // Reset to first page and apply pagination
+      const startIndex = 0;
+      const endIndex = itemsPerPage;
+      const paginatedProducts = filteredProducts.slice(startIndex, endIndex);
+      setProducts(paginatedProducts);
+      setCurrentPage(1);
       setLoading(false);
     } catch (error) {
       console.error(error);
@@ -82,8 +125,21 @@ const ProductSection = () => {
         );
       }
 
-      setProducts(filteredProducts);
+      setAllProducts(filteredProducts);
+      setTotalProducts(filteredProducts.length);
+      
+      // Reset to first page and apply pagination
+      const startIndex = 0;
+      const endIndex = itemsPerPage;
+      const paginatedProducts = filteredProducts.slice(startIndex, endIndex);
+      setProducts(paginatedProducts);
+      setCurrentPage(1);
       setLoading(false);
+      
+      // Close sidebar on mobile after category selection
+      if (window.innerWidth < 768) {
+        setSidebarOpen(false);
+      }
     } catch (error) {
       console.error(error);
       toast.error("Failed to fetch products");
@@ -112,6 +168,30 @@ const ProductSection = () => {
     setIsImageModalOpen(false);
     setSelectedImage(null);
   };
+
+  // Pagination functions
+  const goToPage = (page) => {
+    const startIndex = (page - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    const paginatedProducts = allProducts.slice(startIndex, endIndex);
+    setProducts(paginatedProducts);
+    setCurrentPage(page);
+  };
+
+  const goToNextPage = () => {
+    const totalPages = Math.ceil(totalProducts / itemsPerPage);
+    if (currentPage < totalPages) {
+      goToPage(currentPage + 1);
+    }
+  };
+
+  const goToPrevPage = () => {
+    if (currentPage > 1) {
+      goToPage(currentPage - 1);
+    }
+  };
+
+  const totalPages = Math.ceil(totalProducts / itemsPerPage);
 
   if (loading) {
     return (
@@ -159,16 +239,29 @@ const ProductSection = () => {
       </AnimatePresence>
 
       <section className="max-w-[95%] mx-auto py-12 mt-3 flex flex-col md:flex-row gap-8">
-        {/* Sidebar Toggle (Mobile) */}
-        <div className="md:hidden flex justify-between items-center mt-7">
+        {/* Mobile Toggle Button */}
+        <div className="md:hidden flex justify-start items-center mb-4">
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-lg shadow-lg hover:from-orange-600 hover:to-orange-700 transition w-[200px] md:w-full justify-center sm:w-auto sm:justify-start"
+            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-lg shadow-lg hover:from-orange-600 hover:to-orange-700 transition"
           >
-            {sidebarOpen ? <X size={20} /> : <FaBars size={20} />}
+            <FaBars size={20} />
             Categories
           </button>
         </div>
+
+        {/* Mobile Overlay */}
+        <AnimatePresence>
+          {sidebarOpen && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-[#0000] bg-opacity-50 backdrop-blur-sm z-[998] md:hidden"
+              onClick={() => setSidebarOpen(false)}
+            />
+          )}
+        </AnimatePresence>
 
         {/* Sidebar */}
         <AnimatePresence>
@@ -178,11 +271,19 @@ const ProductSection = () => {
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: -300, opacity: 0 }}
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="w-full md:w-66 bg-white flex-shrink-0 flex flex-col gap-4 mb-4 md:mb-0 fixed md:top-28 left-0 md:left-auto md:sticky p-6 rounded-2xl shadow-xl z-[999] max-h-[80vh] overflow-y-auto"
+              className="w-80 md:w-66 bg-white flex-shrink-0 flex flex-col gap-4 mb-4 md:mb-0 fixed md:top-28 left-0 md:left-auto md:sticky p-6 rounded-r-2xl md:rounded-2xl shadow-xl z-[999] max-h-[80vh] overflow-y-auto"
             >
-              <h3 className="font-bold text-xl mb-4 text-orange-600 border-b pb-3 text-center md:text-left">
-                Product Categories
-              </h3>
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="font-bold text-xl text-orange-600 border-b pb-3 text-center md:text-left flex-1">
+                  Product Categories
+                </h3>
+                <button
+                  onClick={() => setSidebarOpen(false)}
+                  className="md:hidden p-2 hover:bg-gray-100 rounded-lg transition"
+                >
+                  <X size={20} />
+                </button>
+              </div>
               <button
                 onClick={() => fetchProductsByCategory("")}
                 className={`w-full text-left px-4 py-2 flex items-center justify-center md:justify-start rounded-lg font-medium transition group ${
@@ -336,6 +437,85 @@ const ProductSection = () => {
               </motion.div>
             ))}
           </motion.div>
+
+          {/* Pagination Controls */}
+          {totalPages > 1 && (
+            <div className="flex flex-col sm:flex-row justify-center items-center mt-12 mb-8 gap-4 sm:gap-6">
+              {/* Pagination Buttons */}
+              <div className="flex items-center gap-1 sm:gap-2">
+                {/* Previous Button */}
+                <button
+                  onClick={goToPrevPage}
+                  disabled={currentPage === 1}
+                  className={`px-3 sm:px-4 py-2 rounded-lg font-medium transition text-sm sm:text-base ${
+                    currentPage === 1
+                      ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                      : "bg-gradient-to-r from-orange-500 to-orange-600 text-white hover:from-orange-600 hover:to-orange-700 shadow-lg"
+                  }`}
+                >
+                  <span className="hidden xs:inline">Previous</span>
+                  <span className="xs:hidden">Prev</span>
+                </button>
+
+                {/* Page Numbers - Responsive display */}
+                <div className="flex items-center gap-1">
+                  {/* Show fewer page numbers on mobile */}
+                  {Array.from({ length: Math.min(isMobile ? 3 : 5, totalPages) }, (_, i) => {
+                    let pageNum;
+                    const maxPages = isMobile ? 3 : 5;
+                    
+                    if (totalPages <= maxPages) {
+                      pageNum = i + 1;
+                    } else if (currentPage <= Math.ceil(maxPages / 2)) {
+                      pageNum = i + 1;
+                    } else if (currentPage >= totalPages - Math.floor(maxPages / 2)) {
+                      pageNum = totalPages - maxPages + 1 + i;
+                    } else {
+                      pageNum = currentPage - Math.floor(maxPages / 2) + i;
+                    }
+
+                    return (
+                      <button
+                        key={pageNum}
+                        onClick={() => goToPage(pageNum)}
+                        className={`px-2 sm:px-3 py-2 rounded-lg font-medium transition text-sm sm:text-base min-w-[36px] sm:min-w-[40px] ${
+                          currentPage === pageNum
+                            ? "bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-lg"
+                            : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                        }`}
+                      >
+                        {pageNum}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Next Button */}
+                <button
+                  onClick={goToNextPage}
+                  disabled={currentPage === totalPages}
+                  className={`px-3 sm:px-4 py-2 rounded-lg font-medium transition text-sm sm:text-base ${
+                    currentPage === totalPages
+                      ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                      : "bg-gradient-to-r from-orange-500 to-orange-600 text-white hover:from-orange-600 hover:to-orange-700 shadow-lg"
+                  }`}
+                >
+                  <span className="hidden xs:inline">Next</span>
+                  <span className="xs:hidden">Next</span>
+                </button>
+              </div>
+
+              {/* Page Info - Responsive text */}
+              <div className="text-xs sm:text-sm text-gray-600 text-center px-4">
+                <span className="hidden sm:inline">
+                  Showing {((currentPage - 1) * itemsPerPage) + 1} to {Math.min(currentPage * itemsPerPage, totalProducts)} of {totalProducts} products
+                </span>
+                <span className="sm:hidden">
+                  Page {currentPage} of {totalPages}
+                </span>
+              </div>
+            </div>
+          )}
         </div>
       </section>
     </>
